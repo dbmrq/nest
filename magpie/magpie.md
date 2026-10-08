@@ -82,7 +82,7 @@ A visual overview of the user's skills and AGENTS.md files, with two tabs plus a
 - **Machine** — machine-scoped content known to Magpie, with convenient install buttons for anything missing locally.
 - **Projects** — projects and everything active in them, with cross-install and promote actions.
 
-Generated content is visibly attributed using the shared marking, so users can tell it from their own. Every item can be opened in the user's editor or revealed in the file manager; edits made either way are ordinary local changes: sync folds them in and propagates them. Removing an item, or a generated region inside a shared file, is one action, and removals of Cuckoo-generated content are reported to Cuckoo so it can archive them (see `../contract.md`).
+Generated content is visibly attributed using the shared marking, so users can tell it from their own; removing the marking claims it as theirs. Every item can be opened in the user's editor or revealed in the file manager; edits made either way are ordinary local changes: sync folds them in and propagates them. Removing an item, or a generated region inside a shared file, is one action, and removals of Cuckoo-generated content are reported to Cuckoo so it can archive them (see `../contract.md`).
 
 Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. It binds to loopback by default, and every action it exposes is available on the CLI. When Cuckoo is installed, the GUI links to Cuckoo's proposal inbox and can start a mining run.
 

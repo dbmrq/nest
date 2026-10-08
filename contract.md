@@ -10,7 +10,7 @@ Both apps speak the same file conventions, and Magpie's spec is their canonical 
 - **Scopes** — machine or project, with Magpie's semantics (`magpie/magpie.md`, Concepts).
 - **Locations** — content lives in configured agent locations; each app discovers its own, and when both are installed they must agree on the same files rather than diverge.
 - **No adoption** — every conforming file in a managed location is an item, whoever wrote it; there is no import or registration step (`magpie/magpie.md`, Non-goals).
-- **Attribution** — Cuckoo marks generated content so any manager can recognize it: `generated_by: cuckoo` in frontmatter for items it creates, and entries it adds to shared files live inside regions fenced by `<!-- cuckoo:begin -->` and `<!-- cuckoo:end -->`. Magpie surfaces both.
+- **Attribution** — Cuckoo marks generated content so any manager can recognize it: `generated_by: cuckoo` in frontmatter for items it creates, and entries it adds to shared files live inside regions fenced by `<!-- cuckoo:begin -->` and `<!-- cuckoo:end -->`. Magpie surfaces both. Removing the marking — the key or the fences — claims the content as the user's: Magpie stops treating it as generated, and Cuckoo treats it as user-authored, never re-marking it on its own.
 
 ## Handoff
 

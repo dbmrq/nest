@@ -57,7 +57,7 @@ A proposal goes live automatically only when the entire gate passes. Anything sh
 ## Applying, marking, and removal
 
 - Passing proposals are written to the right scope and location with a conforming item ID, preserving surrounding content: new skills become their own directory, additions to AGENTS.md files or existing items live inside a clearly marked region.
-- Applied items are marked as auto-generated: machine-readable provenance in frontmatter plus a human-visible marker, so the user knows at a glance what to review.
+- Applied items are marked as auto-generated: machine-readable provenance in frontmatter plus a human-visible marker, so the user knows at a glance what to review. Removing the marking claims the item as the user's, and Cuckoo never re-marks the item itself.
 - Nothing user-authored is overwritten silently; a proposal that collides with different content is reported instead of applied.
 - New items are announced: a prominent GUI section and badge, a best-effort desktop notification, and a digest agents can report on request.
 - Removing an item is one action from the GUI or the CLI, and items deleted through Magpie reach the archive the same way. Rejected and removed items go to the archive, so mining won't suggest them again.
