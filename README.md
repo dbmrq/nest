@@ -7,7 +7,7 @@ Two sister apps that compose into one loop for agent context:
 
 Neither app requires the other. Together they share the conventions defined once in [`contract.md`](contract.md).
 
-Each app's source is a natural-language spec. **Compile** one by handing its spec — together with the contract — to an AI agent (e.g. "compile Magpie into Python"); **install** one by asking an agent to install it from the spec.
+Each app's source is a natural-language spec. **Compile** one by handing its spec — together with the contract — to an AI agent (e.g. "compile Magpie into Python"), which builds it with a small Ralph loop (`scripts/ralph-loop.sh`); **install** one by asking an agent to install it from the spec.
 
 - [`magpie/magpie.md`](magpie/magpie.md) — the Magpie spec
 - [`cuckoo/cuckoo.md`](cuckoo/cuckoo.md) — the Cuckoo spec
