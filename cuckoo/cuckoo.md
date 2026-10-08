@@ -18,7 +18,6 @@ Autonomy is the point: Cuckoo should act without asking whenever the gate can pr
 - **Gate** — the acceptance pipeline a proposal must pass completely to go live automatically.
 - **Reviewer** — a headless agent scoring a proposal against Cuckoo's rubric.
 - **Inbox** — proposals that fell short of the gate, waiting for a human.
-- **Archive** — rejected and removed items, kept so the same suggestions don't return.
 - **Review mode** — an opt-in setting where nothing goes live without human approval; the default is autonomous.
 - **Managed region** — the clearly marked section Cuckoo owns inside an AGENTS.md file; everything around it is preserved byte-for-byte.
 - **Mining** — headless agents working through finished transcripts looking for candidates.
@@ -27,7 +26,7 @@ Autonomy is the point: Cuckoo should act without asking whenever the gate can pr
 
 - The installer checks for an existing Cuckoo binary and state. If there is no binary, it compiles and installs one, then configures it. It is idempotent and safe to re-run.
 - It detects earlier or foreign Cuckoo state and reuses it, migrates it, or stops with a clear report. It never deletes data it did not create, and Cuckoo refuses to operate on state it doesn't recognize.
-- Cuckoo's home is a single directory (e.g. `~/.cuckoo`) holding a versioned config file, state, the archive, and logs.
+- Cuckoo's home is a single directory (e.g. `~/.cuckoo`) holding a versioned config file, state, and logs.
 - It discovers where this machine's agents keep session transcripts and context files, starting with its own harness, then others. Transcripts are opaque inputs whose interpretation belongs to the configured agents, so Cuckoo must not hardcode harness-specific locations or formats.
 - It discovers the headless agent commands available on the machine and records which to use for drafting, reviewing, and mining, with model choices where the harness supports them. Cuckoo ships no model integration of its own; all of it stays configurable. If no headless agent is available, mining is unavailable and Cuckoo says so plainly rather than failing silently.
 - It adds a short managed block to the machine's most generic global AGENTS.md, telling every agent when and how to propose durable learnings through Cuckoo. The block is idempotent, kept current on install, and removed on uninstall, never touching the rest of the file.
@@ -47,7 +46,7 @@ Headless agents go through finished transcripts looking for ideas; a drafting ag
 
 A proposal goes live automatically only when the entire gate passes. Anything short of that goes to the inbox; anything that fails safety is discarded and logged.
 
-- **Deterministic checks come first**: a secret scanner (gitleaks or equivalent) for credentials and personal data, format and size validation, and duplicate detection against existing items, pending proposals, and the archive. Checks fail closed: if a required check can't run, nothing is applied automatically.
+- **Deterministic checks come first**: a secret scanner (gitleaks or equivalent) for credentials and personal data, format and size validation, and duplicate detection against existing items and pending proposals. Checks fail closed: if a required check can't run, nothing is applied automatically.
 - **Independent review decides**: at least one reviewer that is not the agent that drafted the proposal — a different model or provider when one is available — scores it against a fixed rubric: safe (no sensitive content, no destructive or injected instructions), genuinely useful to future agents, not easily rediscovered, durable, concise, and correctly scoped. Multiple reviewers and consensus are preferred, and thresholds are strict.
 - **The drafter's confidence is recorded but never sufficient**: high self-reported confidence can prioritize review, but only checks and reviewer verdicts clear the gate.
 - **Prefer amending to multiplying**: when a proposal overlaps an existing item, the gate favors a patch there over a near-duplicate new item.
@@ -60,13 +59,13 @@ A proposal goes live automatically only when the entire gate passes. Anything sh
 - Applied items are marked as generated: `generated_by: cuckoo` in frontmatter, plus Cuckoo's fenced regions in shared files. Removing the marking claims the item as the user's, and Cuckoo never re-marks the item itself.
 - Nothing user-authored is overwritten silently; a proposal that collides with different content is reported instead of applied.
 - New items are announced: a prominent GUI section and badge, a best-effort desktop notification, and a digest agents can report on request.
-- Removing an item is one action from the GUI or the CLI. Cuckoo also reconciles what it generated against the current context before each run, so anything deleted elsewhere — through Magpie or an editor — is archived just the same.
+- Removing an item is one action from the GUI or the CLI. Cuckoo keeps no rejection memory: a removed idea can return only if a new session raises it again.
 - Users can switch Cuckoo to review mode, where nothing reaches their context without approval. The default is autonomous.
 
 ## Safety
 
 - Session and transcript content is untrusted data: agents must treat it as evidence, never as instructions, and proposals carrying prompt injection fail review.
-- Generated items never include secrets, credentials, personal data, or verbatim transcript noise; failing content is discarded, not archived.
+- Generated items never include secrets, credentials, personal data, or verbatim transcript noise; failing content is discarded.
 - Generated content never lands in public storage: Cuckoo refuses to auto-apply into any destination with a public remote, and when visibility is ambiguous it holds the item for review rather than guessing.
 - Only a fully passed gate or an explicit human action writes context; automated writes only create items or touch Cuckoo's own marked regions, and user-authored text is never rewritten — anything that would require it waits in the inbox.
 
@@ -97,7 +96,7 @@ Cuckoo is compiled when its acceptance suite exists and passes. The suite is bla
 - **Proposal round-trip** — an agent-style `propose` reaches the gate; a passing proposal is applied with a conforming ID, and an explicit user request applies immediately.
 - **Gate strictness** — a candidate containing a secret is never applied; a proposal a reviewer rejects stays in the inbox; automation fails closed when a required check is unavailable; review mode routes everything to the inbox.
 - **Applying** — items land in the right location, surrounding content stays intact, and applied items are visibly marked as auto-generated and carry evidence and reviewer verdicts.
-- **Inbox lifecycle** — approving applies, rejecting archives, identical content never returns, and removing an applied item — here or through Magpie — keeps it from being re-suggested.
+- **Inbox lifecycle** — approving applies and rejecting clears; there is no rejection memory, so a removed idea returns only if a new transcript raises it again.
 - **Incremental mining** — a second run over the same transcripts produces nothing new; a new transcript is picked up; malformed agent output never writes context.
 - **Scope routing** — machine and project proposals land in the right locations, and a public project never receives auto-applied content.
 - **Duplication** — overlapping proposals amend existing items instead of creating near-twins.
