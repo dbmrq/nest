@@ -82,7 +82,9 @@ A visual overview of the user's skills and AGENTS.md files, with two tabs plus a
 - **Machine** — machine-scoped content known to Magpie, with convenient install buttons for anything missing locally.
 - **Projects** — projects and everything active in them, with cross-install and promote actions.
 
-Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. It binds to loopback by default, and every action it exposes is available on the CLI. When Cuckoo is installed, the GUI links to Cuckoo's proposal inbox.
+Generated content is visibly attributed using the shared marking, so users can tell it from their own. Every item can be opened in the user's editor or revealed in the file manager; edits made either way are ordinary local changes: sync folds them in and propagates them. Removing an item, or a generated region inside a shared file, is one action, and removals of Cuckoo-generated content are reported to Cuckoo so it can archive them (see `../contract.md`).
+
+Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. It binds to loopback by default, and every action it exposes is available on the CLI. When Cuckoo is installed, the GUI links to Cuckoo's proposal inbox and can start a mining run.
 
 ## Done means
 
@@ -96,6 +98,7 @@ Magpie is compiled when its acceptance suite exists and passes. The suite is bla
 - **Conflict safety** — concurrent edits are reported, both versions survive, nothing is overwritten silently.
 - **Scopes and installs** — machine vs project, promote, no duplicate copies, correct "missing here" answers.
 - **Targets and symlinks** — generic targets win; symlinked aliases don't double install.
+- **Attribution and removal feedback** — generated content is recognizable in listings, and deleting it asks the companion to archive it (with a stub companion in the suite).
 - **UI smoke** — `magpie ui` serves the two tabs' data on loopback and exits cleanly.
 - **Skills contract** — bundled skills are valid and reference only existing CLI commands.
 

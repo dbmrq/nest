@@ -18,7 +18,7 @@ Autonomy is the point: Cuckoo should act without asking whenever the gate can pr
 - **Gate** — the acceptance pipeline a proposal must pass completely to go live automatically.
 - **Reviewer** — a headless agent scoring a proposal against Cuckoo's rubric.
 - **Inbox** — proposals that fell short of the gate, waiting for a human.
-- **Archive** — rejected and removed items, kept so the same suggestions don't return.
+- **Archive** — rejected and removed items, including generated items a user deletes through Magpie, kept so the same suggestions don't return.
 - **Review mode** — an opt-in setting where nothing goes live without human approval; the default is autonomous.
 - **Managed region** — the clearly marked section Cuckoo owns inside an AGENTS.md file; everything around it is preserved byte-for-byte.
 - **Mining** — headless agents working through finished transcripts looking for candidates.
@@ -60,7 +60,7 @@ A proposal goes live automatically only when the entire gate passes. Anything sh
 - Applied items are marked as auto-generated: machine-readable provenance in frontmatter plus a human-visible marker, so the user knows at a glance what to review.
 - Nothing user-authored is overwritten silently; a proposal that collides with different content is reported instead of applied.
 - New items are announced: a prominent GUI section and badge, a best-effort desktop notification, and a digest agents can report on request.
-- Removing an item is one action from the GUI or the CLI. Rejected and removed items go to the archive, so mining won't suggest them again.
+- Removing an item is one action from the GUI or the CLI, and items deleted through Magpie reach the archive the same way. Rejected and removed items go to the archive, so mining won't suggest them again.
 - Users can switch Cuckoo to review mode, where nothing reaches their context without approval. The default is autonomous.
 
 ## Safety
@@ -97,7 +97,7 @@ Cuckoo is compiled when its acceptance suite exists and passes. The suite is bla
 - **Proposal round-trip** — an agent-style `propose` reaches the gate; a passing proposal is applied with a conforming ID, and an explicit user request applies immediately.
 - **Gate strictness** — a candidate containing a secret is never applied; a proposal a reviewer rejects stays in the inbox; automation fails closed when a required check is unavailable; review mode routes everything to the inbox.
 - **Applying** — items land in the right location, surrounding content stays intact, and applied items are visibly marked as auto-generated and carry evidence and reviewer verdicts.
-- **Inbox lifecycle** — approving applies, rejecting archives, identical content never returns, and removing an applied item keeps it from being re-suggested.
+- **Inbox lifecycle** — approving applies, rejecting archives, identical content never returns, and removing an applied item — here or through Magpie — keeps it from being re-suggested.
 - **Incremental mining** — a second run over the same transcripts produces nothing new; a new transcript is picked up; malformed agent output never writes context.
 - **Scope routing** — machine and project proposals land in the right locations, and a public project never receives auto-applied content.
 - **Duplication** — overlapping proposals amend existing items instead of creating near-twins.
