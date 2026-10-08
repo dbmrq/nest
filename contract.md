@@ -10,7 +10,7 @@ Both apps speak the same file conventions, and Magpie's spec is their canonical 
 - **Scopes** — machine or project, with Magpie's semantics (`magpie/magpie.md`, Concepts).
 - **Locations** — content lives in configured agent locations; each app discovers its own, and when both are installed they must agree on the same files rather than diverge.
 - **No adoption** — every conforming file in a managed location is an item, whoever wrote it; there is no import or registration step (`magpie/magpie.md`, Non-goals).
-- **Attribution** — Cuckoo marks generated content so any manager can recognize it: `generated_by: cuckoo` in frontmatter for items it creates, and entries it adds to shared files live inside regions fenced by `<!-- cuckoo:begin -->` and `<!-- cuckoo:end -->`. Magpie surfaces both. Removing the marking — the key or the fences — claims the content as the user's: Magpie stops treating it as generated, and Cuckoo treats it as user-authored, never re-marking it on its own.
+- **Attribution** — machine-readable marks live in frontmatter, and any tool may add its own; Magpie displays frontmatter properties generically (`id` aside) and needs no knowledge of their meaning. Cuckoo marks what it creates with `generated_by: cuckoo`, and entries it adds to shared files sit inside regions fenced by `<!-- cuckoo:begin -->` and `<!-- cuckoo:end -->`. Removing a marking — the key or the fences — claims the content as the user's: Cuckoo treats it as user-authored and never re-marks it on its own.
 
 ## Handoff
 
@@ -18,7 +18,6 @@ Both apps speak the same file conventions, and Magpie's spec is their canonical 
 - Magpie needs no cooperation to pick it up: it treats every conforming file it finds as an item, folds it into the library, and propagates it to the user's other machines.
 - Without Magpie, Cuckoo still applies items locally; installing Magpie later picks them up with no migration.
 - Neither app hardcodes the other's internals. The interface is the conventions above and, at most, the companion's public CLI.
-- When Magpie deletes content marked as Cuckoo-generated, it asks the installed Cuckoo to archive it, so the same idea isn't suggested again.
 
 ## Review state
 

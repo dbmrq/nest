@@ -18,7 +18,7 @@ Autonomy is the point: Cuckoo should act without asking whenever the gate can pr
 - **Gate** — the acceptance pipeline a proposal must pass completely to go live automatically.
 - **Reviewer** — a headless agent scoring a proposal against Cuckoo's rubric.
 - **Inbox** — proposals that fell short of the gate, waiting for a human.
-- **Archive** — rejected and removed items, including generated items a user deletes through Magpie, kept so the same suggestions don't return.
+- **Archive** — rejected and removed items, kept so the same suggestions don't return.
 - **Review mode** — an opt-in setting where nothing goes live without human approval; the default is autonomous.
 - **Managed region** — the clearly marked section Cuckoo owns inside an AGENTS.md file; everything around it is preserved byte-for-byte.
 - **Mining** — headless agents working through finished transcripts looking for candidates.
@@ -57,10 +57,10 @@ A proposal goes live automatically only when the entire gate passes. Anything sh
 ## Applying, marking, and removal
 
 - Passing proposals are written to the right scope and location with a conforming item ID, preserving surrounding content: new skills become their own directory, additions to AGENTS.md files or existing items live inside a clearly marked region.
-- Applied items are marked as auto-generated: machine-readable provenance in frontmatter plus a human-visible marker, so the user knows at a glance what to review. Removing the marking claims the item as the user's, and Cuckoo never re-marks the item itself.
+- Applied items are marked as generated: `generated_by: cuckoo` in frontmatter, plus Cuckoo's fenced regions in shared files. Removing the marking claims the item as the user's, and Cuckoo never re-marks the item itself.
 - Nothing user-authored is overwritten silently; a proposal that collides with different content is reported instead of applied.
 - New items are announced: a prominent GUI section and badge, a best-effort desktop notification, and a digest agents can report on request.
-- Removing an item is one action from the GUI or the CLI, and items deleted through Magpie reach the archive the same way. Rejected and removed items go to the archive, so mining won't suggest them again.
+- Removing an item is one action from the GUI or the CLI. Cuckoo also reconciles what it generated against the current context before each run, so anything deleted elsewhere — through Magpie or an editor — is archived just the same.
 - Users can switch Cuckoo to review mode, where nothing reaches their context without approval. The default is autonomous.
 
 ## Safety
