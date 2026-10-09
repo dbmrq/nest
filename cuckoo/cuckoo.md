@@ -86,11 +86,13 @@ The active agent is Cuckoo's primary interface, so Cuckoo ships its own Agent Sk
 
 ## GUI
 
-An inbox-first view of what Cuckoo found and did: proposals awaiting review with their content, rationale, evidence, and reviewer verdicts; recently applied auto-generated items with one-click removal; a mining button with progress; and a settings section for locations, agent commands and models, strictness, and the schedule. When Magpie is installed, it links to Magpie's library. Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. It binds to loopback by default, and every action it exposes is available on the CLI.
+An inbox-first view of what Cuckoo found and did: proposals awaiting review with their content, rationale, evidence, and reviewer verdicts; recently applied auto-generated items with one-click removal; a mining button with progress; and a settings section for locations, agent commands and models, strictness, and the schedule. Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. The web UI binds to loopback by default and must be a real minimal, polished interface, not a raw JSON dump.
+
+Use a simple black-on-white layout with clear typography and spacing, resilient at normal desktop and narrow widths: no horizontal overflow, no unusably narrow text columns, and long proposal content, evidence, paths, model names, and settings values wrap or collapse cleanly. Navigation must visibly change the active view or show a clear empty state. The GUI must let the user do everything the CLI can do: mine, propose, review the inbox, show details, approve, reject, remove, change the schedule, view status, and edit configuration with validated form fields. When Magpie is installed, it links to Magpie's library.
 
 ## Done means
 
-Cuckoo is compiled when its acceptance suite exists and passes. The suite is black-box (drives the `cuckoo` CLI only), offline (stub headless agents and fixture transcripts stand in for real ones), runs with one command, uses a temporary home directory per case, and ships in the repo so future compiles can reuse it. It must cover:
+Cuckoo is compiled when its acceptance suite exists and passes. The suite is black-box (drives the `cuckoo` CLI and, for GUI cases, a browser against the loopback UI), offline (stub headless agents and fixture transcripts stand in for real ones), runs with one command, uses a temporary home directory per case, and ships in the repo so future compiles can reuse it. It must cover:
 
 - **CLI contract** — core commands, `--help`, JSON output, meaningful exit codes.
 - **Proposal round-trip** — an agent-style `propose` reaches the gate; a passing proposal is applied with a conforming ID, and an explicit user request applies immediately.
@@ -103,7 +105,8 @@ Cuckoo is compiled when its acceptance suite exists and passes. The suite is bla
 - **Magpie handoff** — with a manager present, accepted items reach it and sync is requested; without one, Cuckoo still applies to discovered locations, and nothing breaks.
 - **Instruction block** — installing writes the managed AGENTS.md block idempotently and uninstalling removes it, leaving the rest of the file untouched.
 - **Skills contract** — bundled skills are valid and reference only existing CLI commands.
-- **UI smoke** — `cuckoo ui` serves the inbox on loopback and exits cleanly.
+- **GUI end to end** — `cuckoo ui` serves a minimal polished loopback interface; a browser-driven test opens the UI in an actual browser automation harness when available, navigates inbox/recent/settings views, searches or filters proposals, views full proposal content, evidence, and reviewer verdicts, approves, rejects, removes, starts mining through test-safe hooks, edits and validates configuration fields, and verifies that every CLI capability is reachable from the GUI. It checks representative desktop and narrow viewport layouts for overflow or unusably narrow text.
+- **GUI exploratory review** — after automated GUI tests pass, a fresh agent run opens the GUI against representative proposal and mining fixtures and uses it like a real user, recording any visual, navigation, or affordance issues it finds. When screenshots or screen-reading tools are available, the run captures the inbox, proposal details, recent activity, mining progress, and settings, then asks a vision-capable model or visual-inspection agent to identify obvious layout and usability problems. Cuckoo is not compiled until those issues are fixed or explicitly documented as acceptable.
 
 ## Example requests
 

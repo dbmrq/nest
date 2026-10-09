@@ -1,2 +1,4 @@
 .DS_Store
 .ralph-loop/
+target/
+magpie/target/

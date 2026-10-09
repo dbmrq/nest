@@ -8,6 +8,8 @@ This document is Magpie's source. **Compiling** means handing this spec to an AI
 
 Agent guidance for building Magpie in its repository lives in `AGENTS.md`. This spec remains the source of truth for behavior; Done means defines when a build is compiled. Magpie is one of a pair: its interface with Cuckoo is defined once in `../contract.md`.
 
+Each compile is a separate implementation and must live under its own subdirectory, e.g. `magpie/implementations/<implementation-name>/`. Do not put package manifests, generated source, tests, build outputs, bundled runtime skills, or implementation README files directly beside `magpie.md`; the `magpie/` root is for the spec, AGENTS.md guidance, and stable cross-implementation notes.
+
 ## Concepts
 
 - **Skill** — an Agent Skill: a directory containing a `SKILL.md` plus optional supporting files.
@@ -42,8 +44,8 @@ Agent guidance for building Magpie in its repository lives in `AGENTS.md`. This 
 
 ## Projects
 
-- A project is any directory where agents are used. Magpie finds projects by scanning configured roots for agent artifacts (`.agents/`, `.cursor/`, `.github/`, `AGENTS.md`, and so on); users can also add or remove projects manually. Scanning is read-only.
-- A project is identified by the ID of its root AGENTS.md file. Magpie adds it when the project is added or when something is installed into it, so the same project is recognized on every machine.
+- A project is any directory where agents are used. Magpie finds projects by scanning configured roots for agent artifacts (`.agents/`, `.cursor/`, `.github/`, `AGENTS.md`, and so on); users can also add or remove projects manually. Scanning is read-only. Configured roots are scan roots, not necessarily single projects: every directory under them that has its own AGENTS.md is a distinct project, so a repository with `AGENTS.md`, `magpie/AGENTS.md`, and `cuckoo/AGENTS.md` appears as three projects.
+- A project is identified by the ID of that project's own AGENTS.md file. Magpie adds it when the project is added or when something is installed into it, so the same project is recognized on every machine.
 - The GUI shows the projects known on this machine and what skills and AGENTS.md files are active in each, with actions to install, promote (project → machine), and cross-install between projects.
 
 ## Upstream, sync, and installs
@@ -77,18 +79,23 @@ The agent is Magpie's primary interface, so Magpie ships its own Agent Skills th
 
 ## GUI
 
-A visual overview of the user's skills and AGENTS.md files, with two tabs plus a Sync button and a settings section:
+A minimal, polished visual overview of the user's skills and AGENTS.md files. Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. The web UI binds to loopback by default and must be a real interface, not a raw JSON dump.
+
+Use a simple black-on-white layout: one item per row, clear typography and spacing for hierarchy, no card grid. The layout must be resilient at normal desktop and narrow widths: no horizontal overflow, no unusably narrow text columns, and long names, descriptions, paths, metadata, and file contents wrap or collapse cleanly. Skill directories may contain binary or otherwise non-UTF-8 support files; the GUI must never fail the page because of them, and should either mark them as non-text support files or render a safe lossy preview without changing the source files. Frontmatter properties (`id` aside) are shown as key/value metadata, not decorative tags; empty values and empty objects are hidden, and marks like Cuckoo's `generated_by` remain visible without Magpie needing to know what they mean.
+
+The GUI has three working tabs — Machine, Projects, and Settings — plus a global sync control. Switching tabs must change the visible panel without appending the new panel to the old list, or show a clear empty state when the panel has no items. Settings is a first-class tab, not a section tacked onto the bottom of another tab. This must work in an actual browser, including normal browser behaviors such as parallel requests, idle/preconnect sockets, reloads, favicon requests, and repeated tab clicks; those must not surface raw JSON error payloads or HTTP 5xx responses to the user.
 
 - **Machine** — machine-scoped content known to Magpie, with convenient install buttons for anything missing locally.
-- **Projects** — projects and everything active in them, with cross-install and promote actions.
+- **Projects** — projects and everything active in them, with project identity, project path, AGENTS.md contents, cross-install, and promote actions.
+- **Settings** — configuration editing with proper controls for each field: directory pickers for content locations and project scan roots when the platform/browser supports them, file pickers for AGENTS.md paths when supported, a path text fallback everywhere, upstream selection, and sync schedule controls. Validation is field-specific and inline: reject empty or malformed paths, wrong file-vs-directory choices, unreachable locations when reachability is required, and invalid schedules before saving; keep the previous valid configuration if saving fails.
 
-Frontmatter properties (`id` aside) are shown as visible tags on every item, so marks like Cuckoo's `generated_by` stand out without Magpie needing to know what they mean. Items can be opened in the user's editor or revealed in the file manager; edits made either way are ordinary local changes: sync folds them in and propagates them. Removing an item is one action.
+The main list is an accordion, not a wall of always-visible buttons. Each collapsed row shows the item name, kind, scope/install state, important metadata, and a short description or truncated content preview. Expanding one row collapses the previously expanded row. The expanded row shows full details, file/support previews, and the full action set for that item. All visible controls must be wired to real behavior in the browser: inspect, install, uninstall, delete, open, reveal, promote, and cross-install either succeed, show a clear user-facing error, or are disabled with an explanation when the current platform cannot support them. Dead buttons are not acceptable.
 
-Default to a web UI for portability; use a TUI or native app only when the environment clearly favors one. It binds to loopback by default, and every action it exposes is available on the CLI. When Cuckoo is installed, the GUI links to Cuckoo's proposal inbox and can start a mining run.
+The GUI must let the user do everything the CLI can do: list, inspect full file contents, install, uninstall, delete, sync, view status, open items in the editor, reveal them in the file manager, and edit configuration. Sync must show immediate feedback: in-progress state, success summary, and actionable failure or conflict message; a sync button that appears to do nothing is a bug. Removing an item is one clear action; edits made through the editor or file manager are ordinary local changes that sync folds in and propagates. When Cuckoo is installed, the GUI links to Cuckoo's proposal inbox and can start a mining run.
 
 ## Done means
 
-Magpie is compiled when its acceptance suite exists and passes. The suite is black-box (drives the `magpie` CLI only), offline (a local bare git repository stands in for upstream), runs with one command, uses a temporary home directory per case, and ships in the repo so future compiles can reuse it. It must cover:
+Magpie is compiled when all the behaviors above are implemented and verified by an acceptance suite. The suite is black-box (drives the `magpie` CLI and, for GUI cases, a browser against the loopback UI), offline (a local bare git repository stands in for upstream), runs with one command, uses a temporary home directory per case, and ships in the repo so future compiles can reuse it. It should include, but not be limited to:
 
 - **CLI contract** — core commands, `--help`, JSON output, meaningful failure codes.
 - **ID tagging** — the ID lands in frontmatter, a second run changes nothing, the rest of the file is preserved.
@@ -98,8 +105,9 @@ Magpie is compiled when its acceptance suite exists and passes. The suite is bla
 - **Conflict safety** — concurrent edits are reported, both versions survive, nothing is overwritten silently.
 - **Scopes and installs** — machine vs project, promote, no duplicate copies, correct "missing here" answers.
 - **Targets and symlinks** — generic targets win; symlinked aliases don't double install.
-- **Frontmatter display** — listings surface frontmatter properties other than `id`, so tool marks are visible.
-- **UI smoke** — `magpie ui` serves the two tabs' data on loopback and exits cleanly.
+- **Frontmatter display** — listings and the GUI surface non-empty frontmatter properties other than `id` in a clean layout.
+- **GUI end to end** — `magpie ui` serves a minimal polished loopback interface; a browser-driven test uses distinct machine and project fixtures, including nested AGENTS.md files that must appear as separate projects, opens the UI in an actual browser automation harness, clicks between Machine, Projects, and Settings repeatedly, and verifies the visible panel changes without any page-level error, raw JSON error payload, or HTTP 5xx response. Raw loopback HTTP requests are allowed only as smoke tests, not as a substitute for browser navigation. When a browser automation harness is genuinely unavailable, the fallback test must still simulate browser-like behavior, including repeated navigation, parallel or idle connections, reloads, and `/favicon.ico`, and must fail on any server error. The GUI test also searches, checks representative desktop and narrow viewport layouts for overflow or unusably narrow text, verifies accordion behavior by expanding one row and seeing the previous row collapse, views full skill and AGENTS.md contents, includes a non-UTF-8 skill support file and verifies the UI still loads, sees project identity/path for each AGENTS.md-backed project, installs, uninstalls, deletes, syncs with visible feedback, opens/reveals an item through test-safe hooks, edits and validates configuration fields through Settings controls, and verifies that every visible button either performs its action or presents a clear disabled/error state.
+- **GUI exploratory review** — after automated GUI tests pass, a fresh agent run opens the GUI against representative fixtures and uses it like a real user, recording any visual, navigation, or affordance issues it finds. When screenshots or screen-reading tools are available, the run captures the Machine tab, Projects tab, item details, and settings, then asks a vision-capable model or visual-inspection agent to identify obvious layout and usability problems. Magpie is not compiled until those issues are fixed.
 - **Skills contract** — bundled skills are valid and reference only existing CLI commands.
 
 ## Example requests
